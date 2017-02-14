@@ -18,99 +18,74 @@ function createMap(){
 };
 
 
-// function onEachFeature(feature, layer) {
-//     //no property named popupContent; instead, create html string with all properties
-//     var popupContent = "";
-//     if (feature.properties) {
-//         //loop to add feature property names and values to html string
-//         for (var property in feature.properties){
-//             popupContent += "<p>" + property + ": " + feature.properties[property] + "</p>";
-//         }
-//         layer.bindPopup(popupContent);
-//     };
-// };
-
-//function to retrieve the data and place it on the map
 function getData(map){
     //load the data
-  $.ajax("data/CO2centroids.geojson", {
-          dataType: "json",
-          success: function(response){
-              //create marker options
-              var geojsonMarkerOptions = {
-                  radius: 8,
-                  fillColor: "#ff7800",
-                  color: "#000",
-                  weight: 1,
-                  opacity: 1,
-                  fillOpacity: 0.8
-              };
+    $.ajax("data/CO2centroids.geojson", {
+        dataType: "json",
+        success: function(response){
+            //call function to create proportional symbols
+            createPropSymbols(response, map);
+        }
+    });
+};
+//function to convert markers to circle markers
+function pointToLayer(feature, latlng){
+    //Determine which attribute to visualize with proportional symbols
+    var attribute = "CO2_2007";
 
-              // //create a Leaflet GeoJSON layer and add it to the map
-              // L.geoJson(response, {
-              //     pointToLayer: function (feature, latlng){
-              //         return L.circleMarker(latlng, geojsonMarkerOptions);
-              //     }
-              // }).addTo(map);
+    //create marker options
+    var options = {
+        fillColor: "#ff7800",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+    };
 
-              var markers = L.geoJson()
+    //For each feature, determine its value for the selected attribute
+    var attValue = Number(feature.properties[attribute]);
 
-              for (var i = 0; i < response.features.length; i++) {
-                  var a = response.features[i];
-                  //add properties html string to each marker
-                  var properties = "";
-                  for (var property in a.properties){
-                      properties += "<p>" + property + ": " + a.properties[property] + "</p>";
-                      console.log(property,a.properties[property]);
-                  };
-                  var marker = L.circleMarker(new L.LatLng(a.geometry.coordinates[1], a.geometry.coordinates[0]), geojsonMarkerOptions, { properties: properties });
-                  //add a popup for each marker
-                  marker.bindPopup(properties);
-                  //add marker to MarkerClusterGroup
-                  markers.addLayer(marker);
-              }
+    //Give each feature's circle marker a radius based on its attribute value
+    options.radius = calcPropRadius(attValue);
 
-              //add geoJSON layer to map
-              map.addLayer(markers);
-          }
-      });
+    //create circle marker layer
+    var layer = L.circleMarker(latlng, options);
 
+    //build popup content string starting with country
+  var popupContent = "<p><b>Country:</b> " + feature.properties.Country + "</p>";
+
+  //add formatted attribute to popup content string
+  var year = attribute.split("_")[1];
+  var emissions = (feature.properties[attribute])
+  popupContent += "<p><b>CO2 Emissions in " + year + " (kt):</b> " + emissions.toFixed(2) + " </p>";
+
+    //bind the popup to the circle marker
+    layer.bindPopup(popupContent);
+
+    //return the circle marker to the L.geoJson pointToLayer option
+    return layer;
 };
 
-// //function to retrieve the data and place it on the map
-// function getData(map){
-//     //load the data
-//     $.ajax("data/CO2centroids.geojson", {
-//         dataType: "json",
-//         success: function(response){
-//             //examine the data in the console to figure out how to construct the loop
-//             //console.log(response)
-//
-//             //create an L.markerClusterGroup layer
-//             var markers = L.markerClusterGroup();
-//             var geostuff = JSON.stringify(response)
-//             console.log(geostuff)
-//
-//             //loop through features to create markers and add to MarkerClusterGroup
-//             for (var i = 0; i < response.features.length; i++) {
-//                 var a = response.features[i];
-//                 //add properties html string to each marker
-//                 var properties = "";
-//                 for (var property in a.properties){
-//                     properties += "<p>" + property + ": " + a.properties[property] + "</p>";
-//                 };
-//                 var marker = L.marker(new L.LatLng(a.geometry.coordinates[1], a.geometry.coordinates[0]), { properties: properties });
-//                 //add a popup for each marker
-//                 marker.bindPopup(properties);
-//                 //add marker to MarkerClusterGroup
-//                 markers.addLayer(marker);
-//             }
-//
-//             //add MarkerClusterGroup to map
-//             map.addLayer(markers);
-//         }
-//     });
-// };
+function calcPropRadius(attValue) {
+    //scale factor to adjust symbol size evenly
+    var scaleFactor = .0001;
+    //area based on attribute value and scale factor
+    var area = attValue * scaleFactor;
+    //radius calculated based on area
+    var radius = Math.sqrt(area/Math.PI);
+
+    return radius;
+};
+//Add circle markers for point features to the map
+function createPropSymbols(data, map){
+    //create a Leaflet GeoJSON layer and add it to the map
+    L.geoJson(data, {
+        pointToLayer: pointToLayer
+    }).addTo(map);
+};
+
+
+
 
 
 $(document).ready(createMap);
