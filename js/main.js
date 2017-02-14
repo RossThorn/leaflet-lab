@@ -10,7 +10,8 @@ function createMap(){
 
     //add OSM base tilelayer
     L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+        minZoom:2
     }).addTo(map);
 
     //call getData function
@@ -30,87 +31,177 @@ function createMap(){
 //     };
 // };
 
-//function to retrieve the data and place it on the map
-function getData(map){
-    //load the data
-  $.ajax("data/CO2centroids.geojson", {
-          dataType: "json",
-          success: function(response){
-              //create marker options
-              var geojsonMarkerOptions = {
-                  radius: 8,
-                  fillColor: "#ff7800",
-                  color: "#000",
-                  weight: 1,
-                  opacity: 1,
-                  fillOpacity: 0.8
-              };
-
-              // //create a Leaflet GeoJSON layer and add it to the map
-              // L.geoJson(response, {
-              //     pointToLayer: function (feature, latlng){
-              //         return L.circleMarker(latlng, geojsonMarkerOptions);
-              //     }
-              // }).addTo(map);
-
-              var markers = L.geoJson()
-
-              for (var i = 0; i < response.features.length; i++) {
-                  var a = response.features[i];
-                  //add properties html string to each marker
-                  var properties = "";
-                  for (var property in a.properties){
-                      properties += "<p>" + property + ": " + a.properties[property] + "</p>";
-                      console.log(property,a.properties[property]);
-                  };
-                  var marker = L.circleMarker(new L.LatLng(a.geometry.coordinates[1], a.geometry.coordinates[0]), geojsonMarkerOptions, { properties: properties });
-                  //add a popup for each marker
-                  marker.bindPopup(properties);
-                  //add marker to MarkerClusterGroup
-                  markers.addLayer(marker);
-              }
-
-              //add geoJSON layer to map
-              map.addLayer(markers);
-          }
-      });
-
-};
-
 // //function to retrieve the data and place it on the map
 // function getData(map){
 //     //load the data
-//     $.ajax("data/CO2centroids.geojson", {
-//         dataType: "json",
-//         success: function(response){
-//             //examine the data in the console to figure out how to construct the loop
-//             //console.log(response)
+//   $.ajax("data/CO2centroids.geojson", {
+//           dataType: "json",
+//           success: function(response){
+//               //create marker options
+//               var geojsonMarkerOptions = {
+//                   radius: 8,
+//                   fillColor: "#ff7800",
+//                   color: "#000",
+//                   weight: 1,
+//                   opacity: 1,
+//                   fillOpacity: 0.8
+//               };
 //
-//             //create an L.markerClusterGroup layer
-//             var markers = L.markerClusterGroup();
-//             var geostuff = JSON.stringify(response)
-//             console.log(geostuff)
+//               // //create a Leaflet GeoJSON layer and add it to the map
+//               // L.geoJson(response, {
+//               //     pointToLayer: function (feature, latlng){
+//               //         return L.circleMarker(latlng, geojsonMarkerOptions);
+//               //     }
+//               // }).addTo(map);
 //
-//             //loop through features to create markers and add to MarkerClusterGroup
-//             for (var i = 0; i < response.features.length; i++) {
-//                 var a = response.features[i];
-//                 //add properties html string to each marker
-//                 var properties = "";
-//                 for (var property in a.properties){
-//                     properties += "<p>" + property + ": " + a.properties[property] + "</p>";
-//                 };
-//                 var marker = L.marker(new L.LatLng(a.geometry.coordinates[1], a.geometry.coordinates[0]), { properties: properties });
-//                 //add a popup for each marker
-//                 marker.bindPopup(properties);
-//                 //add marker to MarkerClusterGroup
-//                 markers.addLayer(marker);
-//             }
+//               var markers = L.geoJson()
 //
-//             //add MarkerClusterGroup to map
-//             map.addLayer(markers);
-//         }
-//     });
+//               for (var i = 0; i < response.features.length; i++) {
+//                   var a = response.features[i];
+//                   //add properties html string to each marker
+//                   var properties = "";
+//                   for (var property in a.properties){
+//                       properties += "<p>" + property + ": " + a.properties[property] + "</p>";
+//                       console.log(property,a.properties[property]);
+//                   };
+//                   var marker = L.circleMarker(new L.LatLng(a.geometry.coordinates[1], a.geometry.coordinates[0]), geojsonMarkerOptions, { properties: properties });
+//                   //add a popup for each marker
+//                   marker.bindPopup(properties);
+//                   //add marker to MarkerClusterGroup
+//                   markers.addLayer(marker);
+//               }
+//
+//               //add geoJSON layer to map
+//               map.addLayer(markers);
+//           }
+//       });
+//
 // };
+
+
+function pointToLayer(feature, latlng){
+    //create marker options
+    var options = {
+        radius: 8,
+        fillColor: "#ff7800",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+    };
+    var attribute = "CO2_2007";
+    //For each feature, determine its value for the selected attribute
+     var attValue = Number(feature.properties[attribute]);
+
+     //Give each feature's circle marker a radius based on its attribute value
+     options.radius = calcPropRadius(attValue);
+
+     //create circle marker layer
+     var layer = L.circleMarker(latlng, options);
+
+     //original popupContent changed to panelContent...Example 2.2 line 1
+        var panelContent = "<p><b>Country:</b> " + feature.properties.Country + "</p>";
+
+        //add formatted attribute to panel content string
+        var year = attribute.split("_")[1];
+        panelContent += "<p><b>CO2 emissions in " + year + " (kt):</b> " + feature.properties[attribute] + "</p>";
+
+        //popup content is now just the city name
+        var popupContent = feature.properties.Country;
+
+        //bind the popup to the circle marker
+        layer.bindPopup(popupContent, {
+            offset: new L.Point(0,-options.radius),
+            closeButton: false
+        });
+
+        //event listeners to open popup on hover and fill panel on click
+        layer.on({
+            mouseover: function(){
+                this.openPopup();
+            },
+            mouseout: function(){
+                this.closePopup();
+            },
+            click: function(){
+                $("#panel").html(panelContent);
+            }
+        });
+
+
+    //  //build popup content string
+    //  var popupContent = "<p><b>Country:</b> " + feature.properties.Country + "</p><p><b>" + "CO2 Emissions (kt):</b> " + feature.properties[attribute] + "</p>";
+     //
+    //  //bind the popup to the circle marker
+    //  layer.bindPopup(popupContent);
+     //
+    //  ///event listeners to open popup on hover and fill panel on click...Example 2.5 line 4
+    //  layer.on({
+    //      mouseover: function(){
+    //          this.openPopup();
+    //      },
+    //      mouseout: function(){
+    //          this.closePopup();
+    //      },
+    //      click: function(){
+    //          $("#panel").html(popupContent);
+    //      }
+    //  });
+
+     //return the circle marker to the L.geoJson pointToLayer option
+     return layer;
+ };
+
+ //Add circle markers for point features to the map
+ function createPropSymbols(data, map){
+     //create a Leaflet GeoJSON layer and add it to the map
+     L.geoJson(data, {
+         pointToLayer: pointToLayer
+     }).addTo(map);
+ };
+
+//Step 2: Import GeoJSON data
+function getData(map){
+    //load the data
+    $.ajax("data/CO2centroids.geojson", {
+        dataType: "json",
+        success: function(response){
+            //call function to create proportional symbols
+            createPropSymbols(response, map);
+            createSequenceControls(map);
+        }
+    });
+};
+
+function calcPropRadius(attValue) {
+    //scale factor to adjust symbol size evenly
+    var scaleFactor = .001;
+    //area based on attribute value and scale factor
+    var area = attValue * scaleFactor;
+    //radius calculated based on area
+    var radius = Math.sqrt(area/Math.PI);
+
+    return radius;
+};
+
+// function createSequenceControls(map){
+//     //create range input element (slider)
+//     $('#panel').append('<input class="range-slider" type="range">');
+//
+//     $('.range-slider').attr({
+//         max: 6,
+//         min: 0,
+//         value: 0,
+//         step: 1
+//     });
+//     // $('#panel').append('<button class="skip" id="reverse">Reverse</button>');
+//     // $('#panel').append('<button class="skip" id="forward">Skip</button>');
+//     // $('#reverse').html('<img src="img/reverse.png">');
+//     // $('#forward').html('<img src="img/forward.png">');
+// };
+
+
+
 
 
 $(document).ready(createMap);

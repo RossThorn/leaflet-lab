@@ -3,7 +3,20 @@ body {
   margin: 0;
 }
 
-#mapid {
-  height:655px;
-  width:100%;
+#mapid  {
+  height: 650px;
+    width: 80%;
+    display: inline-block;
 }
+
+#panel {
+    width: 16%;
+    padding: 20px;
+    display: inline-block;
+    vertical-align: top;
+    text-align: center;
+}
+
+.leaflet-popup-content p {
+    margin: 0.2em 0;
+  }
