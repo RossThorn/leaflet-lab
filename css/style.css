@@ -9,7 +9,6 @@ body {
     display: inline-block;
 }
 
-<<<<<<< HEAD
 #panel {
     width: 16%;
     padding: 20px;
@@ -20,9 +19,5 @@ body {
 
 .leaflet-popup-content p {
     margin: 0.2em 0;
+    text-align: center;
   }
-=======
-.leaflet-popup-content p {
-    margin: 0.2em 0;
-}
->>>>>>> origin/master
