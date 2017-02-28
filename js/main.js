@@ -14,8 +14,13 @@ function createMap(){
         minZoom:2
     }).addTo(map);
 
+    // Create necessary panes in correct order
+    map.createPane("polygonsPane");
+    map.createPane("pointsPane");
+
     //call getData function
-    getData(map);
+        getCountryShapeData(map);
+        getData(map);
 };
 
 var year;
@@ -140,10 +145,10 @@ function pointToLayer(feature, latlng, attributes){
 
       }
 
-     }).addTo(map);
+    }, { pane:"pointsPane"}).addTo(map);
  };
 
-//Step 2: Import GeoJSON data
+
 function getData(map){
     //load the data
     $.ajax("data/CO2centroids.geojson", {
@@ -157,6 +162,7 @@ function getData(map){
         }
     });
 };
+
 
 function calcPropRadius(attValue) {
     //scale factor to adjust symbol size evenly
@@ -290,8 +296,6 @@ function updatePropSymbols(map, attribute){
             var props = layer.feature.properties;
 
 
-                console.log(props[attribute])
-
                  //update each feature's radius based on new attribute values
                  var radius = calcPropRadius(props[attribute]);
 
@@ -341,6 +345,66 @@ function processData(data){
 
     return attributes;
 };
+
+
+
+
+
+function getCountryShapeData(map){
+    //load the data
+    $.ajax("data/Countries.geojson", {
+        dataType: "json",
+        success: function(response){
+            createPolygons(response, map, attributes);
+        }
+    });
+};
+function createPolygons(data, map, attributes){
+    //create a Leaflet GeoJSON layer and add it to the map
+    L.geoJson(data, {
+      polyToLayer: function(feature, latlngs){
+         return polyToLayer(feature, latlng, attributes);
+     }
+
+   }, { pane:"polygonsPane"}).addTo(map);
+};
+
+
+function polyToLayer(feature, latlngs, attributes){
+    //create marker options
+    var options = {
+        fillColor: "#000000",
+        opacity: 1,
+        fillOpacity: 0.8
+    };
+
+     var layer = L.polygon(latlngs, options);
+
+        //bind the popup to the circle marker
+        layer.bindPopup(popupContent, {
+            offset: new L.Point(0,-options.radius),
+            closeButton: false
+        });
+
+        //event listeners to open popup on hover and fill panel on click
+        layer.on({
+            mouseover: function(){
+                this.openPopup();
+            },
+            mouseout: function(){
+                this.closePopup();
+            },
+
+        });
+
+     //return the circle marker to the L.geoJson pointToLayer option
+     return layer;
+ };
+
+
+
+
+
 
 
 $(document).ready(createMap);
