@@ -18,8 +18,8 @@ function createMap(){
     });
 
     //add OSM base tilelayer
-    L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+    L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
         minZoom:2
     }).addTo(map);
 
@@ -31,7 +31,8 @@ function createMap(){
     //call getData function
         getCountryShapeData(map);
         getData(map);
-        L.control.layers(polyLayer).addTo(map);
+
+
 };
 
 
@@ -49,13 +50,13 @@ function getCountryShapeData(map){
 function processPolyData(data){
   //properties of the first feature in the dataset
   var properties = data.features[0].properties;
-  console.log(properties);
+  //console.log(properties);
   //push each attribute name into attributes array
   for (var attribute in properties){
       //only take attributes with Rank values
       if (attribute.indexOf("Rank") > -1){
           attributes.push(attribute);
-          console.log(properties[attribute]);
+          //console.log(properties[attribute]);
       };
   };
 
@@ -65,24 +66,39 @@ function processPolyData(data){
 
 function createPolygons(data, map, attributes){
     //create a Leaflet GeoJSON layer and add it to the map
-    L.geoJson(data, {
-      geometryToLayer: function(feature, latlngs){
-         return polyToLayer(feature, latlng, attributes);
-     }
+    var polyLayer = L.geoJson(data, {
+      style: function(feature){
+        //console.log(feature);
+        var options = {
+            fillColor: getColor(feature.properties.Rank),
+            color: "#a5a5a5",
+            opacity: 1,
+            fillOpacity: 0.8
+        };
+        //console.log(options.fillColor);
+        return options;
+      },
+      pane:"polygonsPane"
+    });
+   //console.log(polyLayer);
+   var overlays = {
+    "Countries with<br> Climate Change Policy": polyLayer
+};
+     L.control.layers(null,overlays).addTo(map);
 
-   }, { pane:"polygonsPane"}).addTo(map);
 };
 
 
 function polyToLayer(feature, latlngs, attributes){
     //create marker options
     var options = {
-        fillColor: "#000000",
+        fillColor: getColor(feature.properties.Rank),
         color: "#a5a5a5",
         opacity: 1,
         fillOpacity: 0.8
     };
 
+    console.log(feature);
 
 
      polyLayer = L.polygon(latlngs, 2.0, options);
@@ -113,7 +129,15 @@ function polyToLayer(feature, latlngs, attributes){
      //return the circle marker to the L.geoJson pointToLayer option
      return polyLayer;
  };
-
+ function getColor(d) {
+   console.log(d);
+     return d == 1000 ? '#800026' :
+            d == 4  ?  '#2C7BB6' :
+            d == 3  ? '#ABD9E9' :
+            d == 2  ? '#FDAE61' :
+            d == 1   ? '#D7191C' :
+                       '#a5a5a5';
+ };
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -163,7 +187,7 @@ function pointToLayer(feature, latlng, attributes){
     //create marker options
     var options = {
         radius: 8,
-        fillColor: "#ff7800",
+        fillColor: "#5e5e5e",
         color: "#000",
         weight: 1,
         opacity: 1,

@@ -20,3 +20,7 @@ body {
 .leaflet-popup-content {
     text-align: center;
 }
+
+.leaflet-polygons-pane{
+  z-index: 399;
+}
