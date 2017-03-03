@@ -11,10 +11,16 @@ var polyLayer;
 
 //function to instantiate the Leaflet map
 function createMap(){
+    var southWest = L.latLng(-90, -180),
+    northEast = L.latLng(90, 180),
+    bounds = L.latLngBounds(southWest, northEast);
+
     //create the map
     var map = L.map('mapid', {
         center: [20, 0],
-        zoom: 2
+        zoom: 2,
+        maxBounds: bounds,
+        maxBoundsViscosity:.7
     });
 
     //add OSM base tilelayer
@@ -71,6 +77,7 @@ function createPolygons(data, map, attributes){
         //console.log(feature);
         var options = {
             fillColor: getColor(feature.properties.Rank),
+            weight: .5,
             color: "#a5a5a5",
             opacity: 1,
             fillOpacity: 0.8
@@ -88,54 +95,12 @@ function createPolygons(data, map, attributes){
 
 };
 
-
-function polyToLayer(feature, latlngs, attributes){
-    //create marker options
-    var options = {
-        fillColor: getColor(feature.properties.Rank),
-        color: "#a5a5a5",
-        opacity: 1,
-        fillOpacity: 0.8
-    };
-
-    console.log(feature);
-
-
-     polyLayer = L.polygon(latlngs, 2.0, options);
-    //  var polygon = L.layerGroup(layer);
-    //  var overlayMaps = {
-    //    "Countries with Emissions Policies": polygon
-    //  };
-     //
-    //  L.control.layers(overlayMaps).addTo(map);
-
-        //bind the popup to the circle marker
-        layer.bindPopup(popupContent, {
-            offset: new L.Point(0,-options.radius),
-            closeButton: false
-        });
-
-        //event listeners to open popup on hover
-        layer.on({
-            mouseover: function(){
-                this.openPopup();
-            },
-            mouseout: function(){
-                this.closePopup();
-            },
-
-        });
-
-     //return the circle marker to the L.geoJson pointToLayer option
-     return polyLayer;
- };
  function getColor(d) {
-   console.log(d);
-     return d == 1000 ? '#800026' :
-            d == 4  ?  '#2C7BB6' :
-            d == 3  ? '#ABD9E9' :
-            d == 2  ? '#FDAE61' :
-            d == 1   ? '#D7191C' :
+   //console.log(d);
+     return d == 4  ?  '#238443' :
+            d == 3  ? '#78c679' :
+            d == 2  ? '#c2e699' :
+            d == 1   ? '#ffffcc' :
                        '#a5a5a5';
  };
 
@@ -153,6 +118,7 @@ function polyToLayer(feature, latlngs, attributes){
              //call function to create proportional symbols
              createPropSymbols(response, map, attributes);
              createSequenceControls(map, attributes);
+             createLegend (map, attributes);
          }
      });
  };
@@ -191,7 +157,7 @@ function pointToLayer(feature, latlng, attributes){
         color: "#000",
         weight: 1,
         opacity: 1,
-        fillOpacity: 0.8
+        fillOpacity: 0.6
     };
     var attribute = attributes[0];
 
@@ -240,23 +206,82 @@ function calcPropRadius(attValue) {
     return radius;
 };
 
+// function createSequenceControls(map, attributes){
+//
+//     //create range input element (slider)
+//     $('#slider').append('<input class="range-slider" type="range">');
+//
+//     $('.range-slider').attr({
+//         max: 6,
+//         min: 0,
+//         value: 0,
+//         step: 1
+//     });
+//    //Step 5: input listener for slider
+//    $('.range-slider').on('input', function(){
+//        var index = $(this).val();
+//
+//        updatePropSymbols(map, attributes[index]);
+//    });
+// };
+
+// //Create new sequence controls
 function createSequenceControls(map, attributes){
-    //create range input element (slider)
-    $('#slider').append('<input class="range-slider" type="range">');
+    var SequenceControl = L.Control.extend({
+        options: {
+            position: 'bottomleft'
+        },
+        onAdd: function (map) {
+            // create the control container div with a particular class name
+            var container = L.DomUtil.create('div', 'sequence-control-container');
+            //$(container).append('<button class="skip" id="reverse" title="Reverse">Reverse</button>');
+            //create range input element (slider)
+            $(container).append('<input class="range-slider" type="range" max="6" min="0" step="1" value="0">');
+          //  $(container).append('<button class="skip" id="forward" title="Forward">Skip</button>');
+          var initialYear = attributes[0]
+          var year = initialYear.split("_")[1];
+          $(container).append('<div>'+year+'</div>');
+           //kill any mouse event listeners on the map
+            $(container).on('mousedown dblclick', function(e){
+                L.DomEvent.stopPropagation(e);
 
-    $('.range-slider').attr({
-        max: 6,
-        min: 0,
-        value: 0,
-        step: 1
+                $('.range-slider').on('input', function(){
+                    var index = $(this).val();
+
+                    updatePropSymbols(map, attributes[index]);
+            });
+            });
+            return container;
+        }
     });
-   //Step 5: input listener for slider
-   $('.range-slider').on('input', function(){
-       var index = $(this).val();
+    map.addControl(new SequenceControl());
+  };
 
-       updatePropSymbols(map, attributes[index]);
-   });
-};
+
+  function createLegend(map, attributes){
+      var LegendControl = L.Control.extend({
+          options: {
+              position: 'bottomright'
+          },
+          onAdd: function (map) {
+              // create the control container with a particular class name
+              var container = L.DomUtil.create('div', 'legend');
+              //PUT YOUR SCRIPT TO CREATE THE TEMPORAL LEGEND HERE
+              $(container).append("<p><b>Camp Populations in <span id=legendYear>"+attributes[0]+"</span></b></p>");
+              // var singleYear = [attributes]
+              // //retreive the id identifying the year in legend div
+              // var legendYear = document.getElementById("legendYear");
+              // //adds text to id in div
+              // $("#legendYear").html("attributes[0]");
+
+              return container;
+          }
+      });
+      //start making legand symbols HERE
+
+
+      map.addControl(new LegendControl());
+  };
 
 //update function for tooltips only
 function updatePropSymbols(map, attribute){
