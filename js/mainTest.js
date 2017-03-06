@@ -207,24 +207,6 @@ function calcPropRadius(attValue) {
     return radius;
 };
 
-// function createSequenceControls(map, attributes){
-//
-//     //create range input element (slider)
-//     $('#slider').append('<input class="range-slider" type="range">');
-//
-//     $('.range-slider').attr({
-//         max: 6,
-//         min: 0,
-//         value: 0,
-//         step: 1
-//     });
-//    //Step 5: input listener for slider
-//    $('.range-slider').on('input', function(){
-//        var index = $(this).val();
-//
-//        updatePropSymbols(map, attributes[index]);
-//    });
-// };
 
 // //Create new sequence controls
 function createSequenceControls(map, attributes){

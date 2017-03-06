@@ -46,3 +46,15 @@ body {
   vertical-align: middle;
 
 }
+
+.legendCircle {
+  font-size: 20px;
+  background-color: rgba(255,255,255,0.8);
+  margin-bottom: 0px;
+  width: 200px;
+  text-align: center;
+  /*line-height: 5px;*/
+  border: solid gray 1px;
+  vertical-align: middle;
+  padding-bottom: 10px;
+}
