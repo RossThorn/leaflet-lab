@@ -234,16 +234,18 @@ function createSequenceControls(map, attributes){
         onAdd: function (map) {
             // create the control container div with a particular class name
             var container = L.DomUtil.create('div', 'sequence-control-container');
+            // create div element with the class 'overlay' and append it to the body
+
             //$(container).append('<button class="skip" id="reverse" title="Reverse">Reverse</button>');
             //create range input element (slider)
             $(container).append('<input class="range-slider" type="range" max="6" min="0" step="1" value="0">');
           //  $(container).append('<button class="skip" id="forward" title="Forward">Skip</button>');
-          var initialYear = attributes[0]
-          var year = initialYear.split("_")[1];
-          $(container).append('<div>'+year+'</div>');
+          // var initialYear = attributes[0]
+          // var year = initialYear.split("_")[1];
+          // $(container).append('<p>'+year+'</p>');
            //kill any mouse event listeners on the map
-            $(container).on('mousedown dblclick', function(e){
-                L.DomEvent.stopPropagation(e);
+           L.DomEvent.disableClickPropagation(container);
+            $(container).on('mousedown click', function(e){
 
                 $('.range-slider').on('input', function(){
                     var index = $(this).val();
@@ -261,18 +263,20 @@ function createSequenceControls(map, attributes){
   function createLegend(map, attributes){
       var LegendControl = L.Control.extend({
           options: {
-              position: 'bottomright'
+              position: 'bottomleft'
           },
           onAdd: function (map) {
               // create the control container with a particular class name
               var container = L.DomUtil.create('div', 'legend');
               //PUT YOUR SCRIPT TO CREATE THE TEMPORAL LEGEND HERE
-              $(container).append("<p><b>Camp Populations in <span id=legendYear>"+attributes[0]+"</span></b></p>");
-              // var singleYear = [attributes]
-              // //retreive the id identifying the year in legend div
-              // var legendYear = document.getElementById("legendYear");
-              // //adds text to id in div
-              // $("#legendYear").html("attributes[0]");
+              var initialYear = attributes[0]
+              $(container).append("<div id='title' style='font-size:12px'><p><b>CO2 emissions in</b></p></div>")
+              $(container).append("<div id='legendYear' class='leaflet-legend-control'></div>");
+              var yearLegend = L.DomUtil.get('legendYear');
+              var year = initialYear.split("_")[1];
+              $(yearLegend).html('<p><b>'+year+'</b></p>');
+
+
 
               return container;
           }
@@ -300,13 +304,14 @@ function updatePropSymbols(map, attribute){
                  popupContent = "<p><b>Country:</b> " + props.Country + "</p>";
 
                  popupContent += "<p><b>CO2 emissions in " + year + " (kt):</b> <br>" + Math.round(props[attribute]) + "</p>";
-
+                 var container = L.DomUtil.get('legendYear');
+                   $(container).html('<p><b>'+year+'</b></p>');
                  //replace the popup to the circle marker
                  layer.bindPopup(popupContent, {
                      offset: new L.Point(0,-radius),
                      closeButton: false
                  })
-                var year =  attribute.split("_")[1];
+
                  layer.on({
                      mouseover: function(){
                          this.openPopup();
