@@ -129,6 +129,7 @@ function createPolygons(data, map, attributes){
              createSequenceControls(map, attributes);
              createSymbolLegend(map,attributes);
              createLegend (map, attributes);
+              createPolyLegend(map);
          }
      });
  };
@@ -434,54 +435,48 @@ function updatePropSymbols(map, attribute){
 
  //////////////////////////////////////////////////////////////////////////////
 
- function createPolyLegend(map, attributes){
+ function createPolyLegend(map){
+
+   var legend = L.control({position: 'bottomleft'});
+
+   legend.onAdd = function (map) {
+
+       var div = L.DomUtil.create('div', 'legendPoly'),
+           grades = [4,3,2,1,0],
+           labels = [];
+
+      div.innerHTML += '<p><b>Climate Change Policy Grade</b></p>'
+
+       // loop through our density intervals and generate a label with a colored square for each interval
+       for (grade in grades) {
+          var colorGrade = grades[grade];
+           div.innerHTML +=
+               '<i style="background:' + getColor(colorGrade) + '"></i>';
+
+               if(colorGrade == 4){
+                 div.innerHTML += '<span id="label"><b>A</b></span>'
+               }
+               else if (colorGrade ==3){
+                 div.innerHTML +='<span id="label"><b>B</b></span>'
+               }
+               else if (colorGrade ==2){
+                 div.innerHTML +='<span id="label"><b>C</b></span>'
+               }
+               else if (colorGrade ==1){
+                 div.innerHTML +='<span id="label"><b>D</b></span>'
+               }
+               else {
+                 div.innerHTML +='<span id="label"><b>No Data</b></span>'
+               }
 
 
-     var LegendControl = L.Control.extend({
-         options: {
-             position: 'bottomleft'
-         },
 
-         onAdd: function (map) {
-       // create the control container with a particular class name
-       var container = L.DomUtil.create('div', 'legendPoly');
+       }
 
-       //Step 1: start attribute legend svg string
-       var svg = '<svg id="attribute-legend" width="200px" height="100px">';
+       return div;
+   };
 
-       //array of circle names to base loop on
-       var classes = {
-            a: '#238443',
-            b: '#78c679' ,
-            c: '#c2e699',
-            d: '#ffffcc',
-            n: '#a5a5a5'
-        };
-
-       //Step 2: loop to add each circle and text to svg string
-       for (var circle in circles){
-           //circle string
-           svg += '<circle class="legend-circle" id="' + circle +
-           '" fill="#a5a5a5" fill-opacity="0.8" stroke="#000000" cx="70"/>';
-
-           //text string
-           svg += '<text id="' + circle + '-text" x="135" y="' + circles[circle] + '"></text>';
-       };
-
-       //close svg string
-       svg += "</svg>";
-
-       //add attribute legend svg to container
-       $(container).append(svg);
-
-
-             return container;
-         }
-     });
-
-     map.addControl(new LegendControl());
-
-     updateLegend(map, attributes[0]);
+   legend.addTo(map);
  };
 
  //////////////////////////////////////////////////////////////////////////////

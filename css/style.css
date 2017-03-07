@@ -60,16 +60,31 @@ body {
 }
 
 .legendPoly {
-  font-size: 20px;
+  font-size: 10px;
   background-color: rgba(255,255,255,0.8);
-  margin-bottom: 0px;
-  /*width: 250px;*/
+
   text-align: center;
   /*line-height: 5px;*/
   border: solid gray 1px;
   vertical-align: middle;
-  padding-bottom: 5px;
+  width: 270px;
+  height: 70px;
+  float: left;
+  margin-right: 8px;
+  opacity: 0.7;
 }
+
+.legendPoly i {
+    width: 25px;
+    height: 25px;
+    border: solid gray 1px;
+    margin-right: 6px;
+    margin-top:0px;
+    opacity: 0.7;
+    display:inline-block;
+}
+
+
 
 #min-text {
   font-size: 12px;
@@ -81,4 +96,10 @@ body {
 
 #max-text {
   font-size: 12px;
+}
+
+#label {
+  margin-right: 6px;
+  vertical-align: top;
+  line-height:3;
 }
