@@ -39,7 +39,7 @@ body {
   font-size: 20px;
   background-color: rgba(255,255,255,0.8);
   margin-bottom: 0px;
-  width: 200px;
+  width: 250px;
   text-align: center;
   line-height: 5px;
   border: solid gray 1px;
@@ -51,10 +51,34 @@ body {
   font-size: 20px;
   background-color: rgba(255,255,255,0.8);
   margin-bottom: 0px;
-  width: 200px;
+  width: 250px;
   text-align: center;
   /*line-height: 5px;*/
   border: solid gray 1px;
   vertical-align: middle;
-  padding-bottom: 10px;
+  padding-bottom: 5px;
+}
+
+.legendPoly {
+  font-size: 20px;
+  background-color: rgba(255,255,255,0.8);
+  margin-bottom: 0px;
+  /*width: 250px;*/
+  text-align: center;
+  /*line-height: 5px;*/
+  border: solid gray 1px;
+  vertical-align: middle;
+  padding-bottom: 5px;
+}
+
+#min-text {
+  font-size: 12px;
+}
+
+#mean-text {
+  font-size: 12px;
+}
+
+#max-text {
+  font-size: 12px;
 }

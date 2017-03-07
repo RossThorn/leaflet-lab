@@ -9,6 +9,8 @@ var attributes = [];
 
 var polyLayer;
 
+//////////////////////////////////////////////////////////////////////////////
+
 //function to instantiate the Leaflet map
 function createMap(){
     var southWest = L.latLng(-90, -180),
@@ -41,6 +43,7 @@ function createMap(){
 
 };
 
+////////////////////////////////////////////////////////////////////////////////
 
 function getCountryShapeData(map){
     //load the data
@@ -52,6 +55,8 @@ function getCountryShapeData(map){
         }
     });
 };
+
+///////////////////////////////////////////////////////////////////////////////
 
 function processPolyData(data){
   //properties of the first feature in the dataset
@@ -69,6 +74,8 @@ function processPolyData(data){
 
   return attributes;
 };
+
+///////////////////////////////////////////////////////////////////////////////
 
 function createPolygons(data, map, attributes){
     //create a Leaflet GeoJSON layer and add it to the map
@@ -91,9 +98,11 @@ function createPolygons(data, map, attributes){
    var overlays = {
     "Countries with<br> Climate Change Policy": polyLayer
 };
-     L.control.layers(null,overlays).addTo(map);
+     L.control.layers(null,overlays,{collapsed:false}).addTo(map);
 
 };
+
+///////////////////////////////////////////////////////////////////////////////
 
  function getColor(d) {
    //console.log(d);
@@ -118,12 +127,13 @@ function createPolygons(data, map, attributes){
              //call function to create proportional symbols
              createPropSymbols(response, map, attributes);
              createSequenceControls(map, attributes);
-             createLegend (map, attributes);
              createSymbolLegend(map,attributes);
+             createLegend (map, attributes);
          }
      });
  };
 
+////////////////////////////////////////////////////////////////////////////////
  function processData(data){
      //properties of the first feature in the dataset
      var properties = data.features[0].properties;
@@ -150,6 +160,7 @@ function createPolygons(data, map, attributes){
     }, { pane:"pointsPane"}).addTo(map);
  };
 
+///////////////////////////////////////////////////////////////////////////////
 function pointToLayer(feature, latlng, attributes){
     //create marker options
     var options = {
@@ -196,6 +207,8 @@ function pointToLayer(feature, latlng, attributes){
      return layer;
  };
 
+ //////////////////////////////////////////////////////////////////////////////
+
 function calcPropRadius(attValue) {
     //scale factor to adjust symbol size evenly
     var scaleFactor = .001;
@@ -207,25 +220,7 @@ function calcPropRadius(attValue) {
     return radius;
 };
 
-// function createSequenceControls(map, attributes){
-//
-//     //create range input element (slider)
-//     $('#slider').append('<input class="range-slider" type="range">');
-//
-//     $('.range-slider').attr({
-//         max: 6,
-//         min: 0,
-//         value: 0,
-//         step: 1
-//     });
-//    //Step 5: input listener for slider
-//    $('.range-slider').on('input', function(){
-//        var index = $(this).val();
-//
-//        updatePropSymbols(map, attributes[index]);
-//    });
-// };
-
+///////////////////////////////////////////////////////////////////////////////
 // //Create new sequence controls
 function createSequenceControls(map, attributes){
     var SequenceControl = L.Control.extend({
@@ -260,11 +255,12 @@ function createSequenceControls(map, attributes){
     map.addControl(new SequenceControl());
   };
 
+///////////////////////////////////////////////////////////////////////////////
 
   function createLegend(map, attributes){
       var LegendControl = L.Control.extend({
           options: {
-              position: 'bottomleft'
+              position: 'bottomright'
           },
           onAdd: function (map) {
               // create the control container with a particular class name
@@ -289,6 +285,7 @@ function createSequenceControls(map, attributes){
       map.addControl(new LegendControl());
   };
 
+//////////////////////////////////////////////////////////////////////////////
 //update function for tooltips only
 function updatePropSymbols(map, attribute){
 
@@ -329,8 +326,11 @@ function updatePropSymbols(map, attribute){
 
          };
 
- //Example 2.7 line 1...function to create the legend
+////////////////////////////////////////////////////////////////////////////////
+
  function createSymbolLegend(map, attributes){
+
+
      var LegendControl = L.Control.extend({
          options: {
              position: 'bottomright'
@@ -341,16 +341,23 @@ function updatePropSymbols(map, attribute){
        var container = L.DomUtil.create('div', 'legendCircle');
 
        //Step 1: start attribute legend svg string
-       var svg = '<svg id="attribute-legend" width="180px" height="180px">';
+       var svg = '<svg id="attribute-legend" width="300px" height="130px">';
 
        //array of circle names to base loop on
-       var circles = ["max", "mean", "min"];
+       var circles = {
+            max: 60,
+            mean: 90,
+            min: 120
+        };
 
        //Step 2: loop to add each circle and text to svg string
-       for (var i=0; i<circles.length; i++){
+       for (var circle in circles){
            //circle string
-           svg += '<circle class="legend-circle" id="' + circles[i] +
-           '" fill="#a5a5a5" fill-opacity="0.8" stroke="#000000" cx="90"/>';
+           svg += '<circle class="legend-circle" id="' + circle +
+           '" fill="#a5a5a5" fill-opacity="0.8" stroke="#000000" cx="65"/>';
+
+           //text string
+           svg += '<text id="' + circle + '-text" x="135" y="' + circles[circle] + '"></text>';
        };
 
        //close svg string
@@ -368,6 +375,8 @@ function updatePropSymbols(map, attribute){
 
      updateLegend(map, attributes[0]);
  };
+
+ //////////////////////////////////////////////////////////////////////////////
 
  function getCircleValues(map, attribute){
      //start with min at highest possible and max at lowest possible number
@@ -402,6 +411,8 @@ function updatePropSymbols(map, attribute){
      };
  };
 
+ //////////////////////////////////////////////////////////////////////////////
+
  //Example 3.7 line 1...Update the legend with new attribute
  function updateLegend(map, attribute){
 
@@ -413,10 +424,67 @@ function updatePropSymbols(map, attribute){
 
        //Step 3: assign the cy and r attributes
        $('#'+key).attr({
-           cy: 179 - radius,
+           cy: 129 - radius,
            r: radius
        });
+       //Step 4: add legend text
+        $('#'+key+'-text').text(Math.round(circleValues[key]*100)/100 + " kilotons");
    };
  };
+
+ //////////////////////////////////////////////////////////////////////////////
+
+ function createPolyLegend(map, attributes){
+
+
+     var LegendControl = L.Control.extend({
+         options: {
+             position: 'bottomleft'
+         },
+
+         onAdd: function (map) {
+       // create the control container with a particular class name
+       var container = L.DomUtil.create('div', 'legendPoly');
+
+       //Step 1: start attribute legend svg string
+       var svg = '<svg id="attribute-legend" width="200px" height="100px">';
+
+       //array of circle names to base loop on
+       var classes = {
+            a: '#238443',
+            b: '#78c679' ,
+            c: '#c2e699',
+            d: '#ffffcc',
+            n: '#a5a5a5'
+        };
+
+       //Step 2: loop to add each circle and text to svg string
+       for (var circle in circles){
+           //circle string
+           svg += '<circle class="legend-circle" id="' + circle +
+           '" fill="#a5a5a5" fill-opacity="0.8" stroke="#000000" cx="70"/>';
+
+           //text string
+           svg += '<text id="' + circle + '-text" x="135" y="' + circles[circle] + '"></text>';
+       };
+
+       //close svg string
+       svg += "</svg>";
+
+       //add attribute legend svg to container
+       $(container).append(svg);
+
+
+             return container;
+         }
+     });
+
+     map.addControl(new LegendControl());
+
+     updateLegend(map, attributes[0]);
+ };
+
+ //////////////////////////////////////////////////////////////////////////////
+
 
 $(document).ready(createMap);
