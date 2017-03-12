@@ -21,12 +21,12 @@
         <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
           <div class="container-fluid">
                 <!-- Brand and toggle get grouped for better mobile display -->
-            <div class="navbar-header page-scroll">
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <div class="header">
+              <!-- <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
                 <span class="sr-only">Toggle navigation</span>
                 Menu <i class="fa fa-bars"></i>
-              </button>
-              <a class="navbar-brand" href="index.html">A Greener World</a>
+              </button> -->
+              <span id="page-title">A Greener World - Greenhouse Gas Emissions</span>
             </div>
 
             <!-- Collect the nav links, forms, and other content for toggling -->
@@ -38,15 +38,19 @@
       </div>
 
         <!--put your initial page content here-->
-		<div id="mapid"></div>
-    <!-- <div id="panel">
-      <div id="slider"></div> -->
-      <!-- <div id="info"></div> -->
-    <!-- </div> -->
-        <!--you can also use this space for internal scripts or stylesheets;
-        place these within <script> or <style> tags-->
+    <div id="page">
+		    <div id="mapid"></div>
+        <div id="page-content">
+          <p id="content-header" style="color:#666666; margin:0px; padding-top:0px;">Captain Planet Needs Your Help!</p>
+          <p id="content"style="padding:20px;">Greenhouse gases are one of the main contributors to rising temperatures in today’s world. Although the earth’s temperature and atmosphere composition naturally cycle, human activity within the last century has caused a large disturbance in that cycle (see NASA’s <a href="https://climate.nasa.gov/evidence/">page</a> on climate change for more information).<br><br>
+            Here is a map that shows CO2 emissions from 2007-2013 for 15 countries across the world. Increases and decreases among several countries can be seen during this time. You can also see what grade each country gets based on their climate change policy. These grades were determined by Climate Action Network Europe in an <a href="http://www.caneurope.org/docman/un-climate-negotiations-unfccc/2813-ccpi-2016-results-emborgoed/file">assessment</a> from 2016. This assessment also ranks countries on other aspects as well. You can see where your country falls here.<br><br>
+            We as a world can always improve on how we treat the planet. If you are unsatisfied with your country’s rank, find out ways to contact your leaders or representatives and tell them how important it is to keep our planet healthy for generations to come.
+          </p>
+          <img id="captain" src="img/CaptainDonCheadleLandscape.PNG">
 
-        <!--put your external script links here-->
+        </div>
+    </div>
+
         <script type="text/javascript" src="lib/jquery-3.1.1.js"></script>
         <script type="text/javascript" src="lib/leaflet/leaflet-src.js"></script>
         <script type="text/javascript" src="lib/leaflet-providers.js"></script>

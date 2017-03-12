@@ -19,7 +19,7 @@ function createMap(){
 
     //create the map
     var map = L.map('mapid', {
-        center: [20, 0],
+        center: [20, 10],
         zoom: 2,
         maxBounds: bounds,
         maxBoundsViscosity:.7
@@ -39,7 +39,12 @@ function createMap(){
     //call getData function
         getCountryShapeData(map);
         getData(map);
-
+        $(window).on("resize", function () { $("#mapid").height($(window).height()-50); map.invalidateSize(); }).trigger("resize");
+        $(document).ready(function() {$(window).resize(function() {
+        var bodyheight = $(this).height();
+        $("#page-content").height(bodyheight-70);
+    }).resize();
+});
 
 };
 
@@ -126,10 +131,14 @@ function createPolygons(data, map, attributes){
 
              //call function to create proportional symbols
              createPropSymbols(response, map, attributes);
+             //call function to create sequence controls
              createSequenceControls(map, attributes);
+             //call function to create legend for prop symbols
              createSymbolLegend(map,attributes);
+             //create legend display for year
              createLegend (map, attributes);
-              createPolyLegend(map);
+             //create legend for overlay
+             createPolyLegend(map);
          }
      });
  };
@@ -270,18 +279,10 @@ function createSequenceControls(map, attributes){
               var initialYear = attributes[0]
               $(container).append("<div id='title' style='font-size:12px'><p><b>CO2 emissions in</b></p></div>")
               $(container).append("<div id='legendYear' class='leaflet-legend-control'><p><b>2007</b></p></div>");
-              // var yearLegend = L.DomUtil.get('legendYear');
-              // console.log(yearLegend);
-              // var year = initialYear.split("_")[1];
-              // $(yearLegend).html('<p><b>'+year+'</b></p>');
-
-
 
               return container;
           }
       });
-      //start making legand symbols HERE
-
 
       map.addControl(new LegendControl());
   };
@@ -414,7 +415,7 @@ function updatePropSymbols(map, attribute){
 
  //////////////////////////////////////////////////////////////////////////////
 
- //Example 3.7 line 1...Update the legend with new attribute
+ //Update the legend with new attribute
  function updateLegend(map, attribute){
 
      //get the max, mean, and min values as an object
@@ -423,12 +424,12 @@ function updatePropSymbols(map, attribute){
        //get the radius
        var radius = calcPropRadius(circleValues[key]);
 
-       //Step 3: assign the cy and r attributes
+       //assign the cy and r attributes
        $('#'+key).attr({
            cy: 129 - radius,
            r: radius
        });
-       //Step 4: add legend text
+       //add legend text
         $('#'+key+'-text').text(Math.round(circleValues[key]*100)/100 + " kilotons");
    };
  };
@@ -452,7 +453,7 @@ function updatePropSymbols(map, attribute){
           var colorGrade = grades[grade];
            div.innerHTML +=
                '<i style="background:' + getColor(colorGrade) + '"></i>';
-
+               //assign label to each legend symbol based on the grade
                if(colorGrade == 4){
                  div.innerHTML += '<span id="label"><b>A</b></span>'
                }

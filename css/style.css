@@ -5,9 +5,10 @@ body {
 
 
 #mapid {
-    height: 600px;
-    width: 100%;
+    width: 65%;
+    min-width: 800px;
     display: inline-block;
+    float: left;
 }
 
 
@@ -84,6 +85,23 @@ body {
     display:inline-block;
 }
 
+.header{
+  height: 50px;
+  width: 100%;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.7;
+  background-color: #238443;
+}
+
+#page-title{
+  font-size: 30px;
+  font-weight: bold;
+  font-family: fantasy;
+  color: white;
+  margin-left:20px;
+
+}
 
 
 #min-text {
@@ -102,4 +120,32 @@ body {
   margin-right: 6px;
   vertical-align: top;
   line-height:3;
+}
+
+
+#page-content{
+margin-left: 60%;
+background-color: #edffeb;
+text-align: center;
+padding-top: 20px;
+}
+
+#content-header{
+  font-size: 30px;
+  font-weight: bold;
+  font-family: fantasy;
+  color:#666666;
+  margin:0px;
+  padding-top:0px;
+
+}
+
+#content{
+  color: #666666;
+
+}
+
+#captain{
+  width:50%;
+  box-shadow: 5px 5px 5px #a5a5a5;
 }
