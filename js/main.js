@@ -124,7 +124,7 @@ function createPolygons(data, map, attributes){
 
  function getData(map){
      //load the data
-     $.ajax("data/CO2centroids.geojson", {
+     $.ajax("data/CO2Centroids.geojson", {
          dataType: "json",
          success: function(response){
              var attributes = processData(response);
